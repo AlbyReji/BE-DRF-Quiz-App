@@ -34,6 +34,7 @@ from .pagination import NumberPagination
 
 
 
+#..........................USER REGISTRATION..................................
 
 class Register(APIView):
 
@@ -47,6 +48,9 @@ class Register(APIView):
         else:
             data = serializer.errors
         return Response(data)
+
+
+#..........................ADMIN USER REGISTRATION..................................
 
 class AdminRegister(APIView):
 
@@ -64,6 +68,8 @@ class AdminRegister(APIView):
         return Response(data)
 
 
+#..........................ADMIN: USER LIST..................................
+
 class AdminList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = AdminSerializer
@@ -72,6 +78,7 @@ class AdminList(generics.ListCreateAPIView):
     pagination_class = NumberPagination
 
 
+#..........................ADMIN: EDIT & DELETE USERS..................................
 
 class AdminDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
@@ -88,6 +95,19 @@ class AdminDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"message": "User not found."})
 
 
+#..........................USER PROFILE..................................
+
+class UserProfile(generics.RetrieveAPIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        return self.request.user
+
+
+#..........................QUIZ CREATE..................................
+
 class QuizCreate(generics.CreateAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
@@ -100,6 +120,7 @@ class QuizCreate(generics.CreateAPIView):
         serializer.save(created_by=self.request.user)
 
 
+#..........................QUIZ TAKING..................................
 
 class QuizTaking(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -141,6 +162,7 @@ class QuizTaking(generics.CreateAPIView):
         return Response({"detail": f"Hey ,{user.username}You scored {percentage_score}% on the quiz '{quiz.title}'."})
 
 
+#..........................QUIZ RESULT..................................
 
 class QuizResult(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -151,6 +173,8 @@ class QuizResult(generics.ListAPIView):
         return QuizSubmission.objects.filter(user=user)
 
 
+#..........................QUIZ LIST..................................
+
 class QuizList(generics.ListAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizListSerializer
@@ -160,6 +184,7 @@ class QuizList(generics.ListAPIView):
     pagination_class = NumberPagination
 
 
+#..........................QUIZ ANALYTICS..................................
 
 class QuizAnalytics(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
@@ -231,11 +256,4 @@ class QuizAnalytics(generics.GenericAPIView):
         return Response(serializer.data)
 
 
-class UserProfile(generics.RetrieveAPIView):
-
-    permission_classes = [IsAuthenticated]
-    serializer_class = UserProfileSerializer
-
-    def get_object(self):
-        return self.request.user
 
