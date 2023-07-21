@@ -54,6 +54,7 @@ class Register(APIView):
 
 class AdminRegister(APIView):
 
+    authentication_classes=[JWTAuthentication]
     permission_classes = [IsAdminUser]
     
     def post(self, request, format=None):
@@ -70,21 +71,24 @@ class AdminRegister(APIView):
 
 #..........................ADMIN: USER LIST..................................
 
-class AdminList(generics.ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = AdminSerializer
+class AdminList(generics.ListAPIView):
+    
     permission_classes = [IsAdminUser]
     authentication_classes=[JWTAuthentication]
+    queryset = User.objects.all()
+    serializer_class = AdminSerializer
     pagination_class = NumberPagination
 
 
 #..........................ADMIN: EDIT & DELETE USERS..................................
 
 class AdminDetailView(generics.RetrieveUpdateDestroyAPIView):
+
+    permission_classes = [IsAdminUser]
+    authentication_classes=[JWTAuthentication]    
     queryset = User.objects.all()
     serializer_class = AdminSerializer
-    permission_classes = [IsAdminUser]
-    authentication_classes=[JWTAuthentication]
+
 
     def delete(self, request, *args, **kwargs):
         try:
@@ -99,6 +103,7 @@ class AdminDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class UserProfile(generics.RetrieveAPIView):
 
+    authentication_classes=[JWTAuthentication]    
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
 
@@ -109,9 +114,11 @@ class UserProfile(generics.RetrieveAPIView):
 #..........................QUIZ CREATE..................................
 
 class QuizCreate(generics.CreateAPIView):
+
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes=[JWTAuthentication] 
 
     def get_queryset(self):
         return self.queryset.filter(created_by=self.request.user)
@@ -123,8 +130,10 @@ class QuizCreate(generics.CreateAPIView):
 #..........................QUIZ TAKING..................................
 
 class QuizTaking(generics.CreateAPIView):
+
     permission_classes = [IsAuthenticated]
     serializer_class = QuizSubmissionSerializer
+    authentication_classes=[JWTAuthentication]   
 
     def get_quiz_instance(self, quiz_id):
         try:
@@ -165,17 +174,23 @@ class QuizTaking(generics.CreateAPIView):
 #..........................QUIZ RESULT..................................
 
 class QuizResult(generics.ListAPIView):
+
     permission_classes = [IsAuthenticated]
     serializer_class = QuizSubmissionSerializer
+    authentication_classes=[JWTAuthentication]    
+
 
     def get_queryset(self):
         user = self.request.user
         return QuizSubmission.objects.filter(user=user)
 
 
-#..........................QUIZ LIST..................................
+#..........................QUIZ LIST & QUIZ FILTERING..................................
 
 class QuizList(generics.ListAPIView):
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes=[JWTAuthentication]    
     queryset = Quiz.objects.all()
     serializer_class = QuizListSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -187,7 +202,9 @@ class QuizList(generics.ListAPIView):
 #..........................QUIZ ANALYTICS..................................
 
 class QuizAnalytics(generics.GenericAPIView):
+    
     permission_classes = [IsAuthenticated]
+    authentication_classes=[JWTAuthentication]    
     serializer_class = QuizAnalyticsSerializer
 
     def get(self, request, *args, **kwargs):
